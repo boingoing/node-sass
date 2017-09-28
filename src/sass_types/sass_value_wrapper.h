@@ -70,7 +70,7 @@ namespace SassTypes
     double d = fnc(unwrap(env, _this)->value);
 
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_number(env, d, &ret));
+    CHECK_NAPI_RESULT(napi_create_double(env, d, &ret));
     return ret;
   }
 
@@ -82,7 +82,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
     if (argc != 1) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected just one argument"));
       return nullptr;
     }
 
@@ -90,7 +90,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_number) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a number"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied value should be a number"));
       return nullptr;
     }
 
@@ -122,7 +122,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
     if (argc != 1) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected just one argument"));
       return nullptr;
     }
 
@@ -130,7 +130,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_string) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a string"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied value should be a string"));
       return nullptr;
     }
 
@@ -148,7 +148,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
     if (argc != 1) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected just one argument"));
       return nullptr;
     }
 
@@ -156,7 +156,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_number) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied index should be an integer"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied index should be an integer"));
       return nullptr;
     }
 
@@ -166,7 +166,7 @@ namespace SassTypes
     Sass_Value* collection = unwrap(env, _this)->value;
 
     if (index >= lenfnc(collection)) {
-      CHECK_NAPI_RESULT(napi_throw_range_error(env, "Out of bound index"));
+      CHECK_NAPI_RESULT(napi_throw_range_error(env, nullptr, "Out of bound index"));
       return nullptr;
     }
 
@@ -182,7 +182,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv, &_this, nullptr));
 
     if (argc != 2) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected two arguments"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected two arguments"));
       return nullptr;
     }
 
@@ -190,14 +190,14 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
     if (t != napi_number) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied index should be an integer"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied index should be an integer"));
       return nullptr;
     }
 
     CHECK_NAPI_RESULT(napi_typeof(env, argv[1], &t));
 
     if (t != napi_object) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a SassValue object"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied value should be a SassValue object"));
       return nullptr;
     }
 
@@ -209,7 +209,7 @@ namespace SassTypes
         setfnc(unwrap(env, _this)->value, v, sass_value->get_sass_value());
     }
     else {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "A SassValue is expected"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "A SassValue is expected"));
     }
     return nullptr;
   }
@@ -226,7 +226,7 @@ namespace SassTypes
       napi_value ctor = T::get_constructor(env);
       CHECK_NAPI_RESULT(napi_new_instance(env, ctor, 0, nullptr, &wrapper));
       void* wrapped;
-      CHECK_NAPI_RESULT(napi_unwrap(env, wrapper, &wrapped));
+      CHECK_NAPI_RESULT(napi_remove_wrap(env, wrapper, &wrapped));
       delete static_cast<T*>(wrapped);
       CHECK_NAPI_RESULT(napi_wrap(env, wrapper, this, nullptr, nullptr, nullptr));
       CHECK_NAPI_RESULT(napi_create_reference(env, wrapper, 1, &this->js_object));
@@ -261,8 +261,9 @@ namespace SassTypes
     std::vector<napi_value> argv(argc);
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
 
-    bool r;
-    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
+    napi_value t;
+    CHECK_NAPI_RESULT(napi_get_new_target(env, info, &t));
+    bool r = (t != nullptr);
 
     if (r) {
       Sass_Value* value;
@@ -274,7 +275,7 @@ namespace SassTypes
         CHECK_NAPI_RESULT(napi_create_reference(env, _this, 1, &obj->js_object));
         return _this;
       } else {
-        CHECK_NAPI_RESULT(napi_throw_error(env, sass_error_get_message(value)));
+        CHECK_NAPI_RESULT(napi_throw_error(env, nullptr, sass_error_get_message(value)));
       }
     } else {
       napi_value ctor = T::get_constructor(env);

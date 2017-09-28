@@ -44,7 +44,7 @@ int ExtractOptions(napi_env e, napi_value options, void* cptr, sass_context_wrap
   CHECK_NAPI_RESULT(napi_typeof(e, result_, &t));
 
   if (t != napi_object) {
-    CHECK_NAPI_RESULT(napi_throw_type_error(e, "\"result\" element is not an object"));
+    CHECK_NAPI_RESULT(napi_throw_type_error(e, nullptr, "\"result\" element is not an object"));
     return -1;
   }
 
@@ -268,7 +268,7 @@ void GetStats(napi_env env, sass_context_wrapper* ctx_w, Sass_Context* ctx) {
   if (t == napi_object) {
     CHECK_NAPI_RESULT(napi_set_named_property(env, propertyStats, "includedFiles", arr));
   } else {
-    CHECK_NAPI_RESULT(napi_throw_type_error(env, "\"result.stats\" element is not an object"));
+    CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "\"result.stats\" element is not an object"));
   }
 }
 
@@ -334,7 +334,7 @@ void MakeCallback(uv_work_t* req) {
     assert(success_cb != nullptr);
 
     napi_value unused;
-    CHECK_NAPI_RESULT(napi_make_callback(ctx_w->env, global, success_cb, 0, nullptr, &unused));
+    CHECK_NAPI_RESULT(napi_make_callback(ctx_w->env, nullptr, global, success_cb, 0, nullptr, &unused));
   }
   else if (ctx_w->error_callback) {
     // if error, do callback(error)
@@ -352,7 +352,7 @@ void MakeCallback(uv_work_t* req) {
     assert(error_cb != nullptr);
 
     napi_value unused;
-    CHECK_NAPI_RESULT(napi_make_callback(ctx_w->env, global, error_cb, 1, argv, &unused));
+    CHECK_NAPI_RESULT(napi_make_callback(ctx_w->env, nullptr, global, error_cb, 1, argv, &unused));
   }
 
   sass_free_context_wrapper(ctx_w);
@@ -467,17 +467,17 @@ napi_value libsass_version(napi_env env, napi_callback_info info) {
   return str;
 }
 
-void Init(napi_env env, napi_value target, napi_value module, void* priv) {
+napi_value Init(napi_env env, napi_value target) {
   napi_value functionRender;
-  CHECK_NAPI_RESULT(napi_create_function(env, "render", render, nullptr, &functionRender));
+  CHECK_NAPI_RESULT(napi_create_function(env, "render", NAPI_AUTO_LENGTH, render, nullptr, &functionRender));
   napi_value functionRenderSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderSync", render_sync, nullptr, &functionRenderSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderSync", NAPI_AUTO_LENGTH, render_sync, nullptr, &functionRenderSync));
   napi_value functionRenderFile;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderFile", render_file, nullptr, &functionRenderFile));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFile", NAPI_AUTO_LENGTH, render_file, nullptr, &functionRenderFile));
   napi_value functionRenderFileSync;
-  CHECK_NAPI_RESULT(napi_create_function(env, "renderFileSync", render_file_sync, nullptr, &functionRenderFileSync));
+  CHECK_NAPI_RESULT(napi_create_function(env, "renderFileSync", NAPI_AUTO_LENGTH, render_file_sync, nullptr, &functionRenderFileSync));
   napi_value functionLibsassVersion;
-  CHECK_NAPI_RESULT(napi_create_function(env, "libsassVersion", libsass_version, nullptr, &functionLibsassVersion));
+  CHECK_NAPI_RESULT(napi_create_function(env, "libsassVersion", NAPI_AUTO_LENGTH, libsass_version, nullptr, &functionLibsassVersion));
 
   CHECK_NAPI_RESULT(napi_set_named_property(env, target, "render", functionRender));
   CHECK_NAPI_RESULT(napi_set_named_property(env, target, "renderSync", functionRenderSync));
@@ -486,6 +486,7 @@ void Init(napi_env env, napi_value target, napi_value module, void* priv) {
   CHECK_NAPI_RESULT(napi_set_named_property(env, target, "libsassVersion", functionLibsassVersion));
 
   SassTypes::Factory::initExports(env, target);
+  return target;
 }
 
 NAPI_MODULE(binding, Init)

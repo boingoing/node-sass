@@ -32,7 +32,7 @@
     "lint": "node_modules/.bin/eslint bin/node-sass lib scripts test",
     "test": "node_modules/.bin/mocha test/api.js",
     "build": "node scripts/build.js --force",
-    "prepublish": "not-in-install && node scripts/prepublish.js || in-install"
+    "prepare": "in-publish && node scripts/prepublish.js || not-in-publish"
   },
   "files": [
     "bin",
@@ -65,13 +65,13 @@
     "meow": "^3.7.0",
     "mkdirp": "^0.5.1",
     "nan": "^2.3.2",
+    "node-addon-api": "^1.0.0",
     "node-gyp": "^3.3.1",
     "npmlog": "^4.0.0",
     "request": "^2.61.0",
     "sass-graph": "^2.1.1",
     "stdout-stream": "^1.4.0",
-    "unicode-9.0.0": "^0.7.0",
-    "node-addon-api": "0.3.0"
+    "unicode-9.0.0": "^0.7.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.8",

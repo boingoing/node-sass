@@ -40,7 +40,7 @@ namespace SassTypes
 
     default:
       const char *msg = "Unknown type encountered.";
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, msg));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, msg));
       return new Error(env, sass_make_error(msg));
     }
   }

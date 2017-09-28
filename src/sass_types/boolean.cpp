@@ -34,7 +34,7 @@ namespace SassTypes
         { "getValue", nullptr, Boolean::GetValue },
       };
 
-      CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", Boolean::New, nullptr, 1, methods, &ctor));
+      CHECK_NAPI_RESULT(napi_define_class(env, "SassBoolean", NAPI_AUTO_LENGTH, Boolean::New, nullptr, 1, methods, &ctor));
       CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &Boolean::constructor));
 
       Boolean& falseSingleton = get_singleton(false);
@@ -63,12 +63,13 @@ namespace SassTypes
   }
 
   napi_value Boolean::New(napi_env env, napi_callback_info info) {
-    bool r;
-    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
+    napi_value t;
+    CHECK_NAPI_RESULT(napi_get_new_target(env, info, &t));
+    bool r = (t != nullptr);
 
     if (r) {
       if (constructor_locked) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassBoolean"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Cannot instantiate SassBoolean"));
         return nullptr;
       }
     } else {
@@ -77,7 +78,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
       if (argc != 1) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected one boolean argument"));
         return nullptr;
       }
 
@@ -85,7 +86,7 @@ namespace SassTypes
       CHECK_NAPI_RESULT(napi_typeof(env, argv[0], &t));
 
       if (t != napi_boolean) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected one boolean argument"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected one boolean argument"));
         return nullptr;
       }
 

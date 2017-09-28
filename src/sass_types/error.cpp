@@ -24,7 +24,7 @@ namespace SassTypes
 
   napi_value Error::getConstructor(napi_env env, napi_callback cb) {
     napi_value ctor;
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 0, nullptr, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), NAPI_AUTO_LENGTH, cb, nullptr, 0, nullptr, &ctor));
     return ctor;
   }
 }

@@ -43,7 +43,7 @@ namespace SassTypes
       { "setValue", nullptr, SetValue },
     };
 
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 5, descriptors, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), NAPI_AUTO_LENGTH, cb, nullptr, 5, descriptors, &ctor));
     return ctor;
   }
 
@@ -72,7 +72,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_get_cb_info(env, info, &argc, &arg, &_this, nullptr));
 
     if (argc != 1) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Expected just one argument"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Expected just one argument"));
       return nullptr;
     }
 
@@ -80,7 +80,7 @@ namespace SassTypes
     CHECK_NAPI_RESULT(napi_typeof(env, arg, &t));
 
     if (t != napi_boolean) {
-      CHECK_NAPI_RESULT(napi_throw_type_error(env, "Supplied value should be a boolean"));
+      CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Supplied value should be a boolean"));
       return nullptr;
     }
 
@@ -97,7 +97,7 @@ namespace SassTypes
 
     size_t s = sass_list_get_length(unwrap(env, _this)->value);
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_number(env, (double)s, &ret));
+    CHECK_NAPI_RESULT(napi_create_double(env, (double)s, &ret));
     return ret;
   }
 }

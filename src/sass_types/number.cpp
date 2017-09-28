@@ -42,7 +42,7 @@ namespace SassTypes
         { "setUnit", nullptr, SetUnit },
     };
 
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 4, descriptors, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), NAPI_AUTO_LENGTH, cb, nullptr, 4, descriptors, &ctor));
     return ctor;
   }
 

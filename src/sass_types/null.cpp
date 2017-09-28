@@ -30,7 +30,7 @@ namespace SassTypes
     if (Null::constructor) {
       CHECK_NAPI_RESULT(napi_get_reference_value(env, Null::constructor, &ctor));
     } else {
-      CHECK_NAPI_RESULT(napi_define_class(env, "SassNull", Null::New, nullptr, 0, nullptr, &ctor));
+      CHECK_NAPI_RESULT(napi_define_class(env, "SassNull", NAPI_AUTO_LENGTH, Null::New, nullptr, 0, nullptr, &ctor));
       CHECK_NAPI_RESULT(napi_create_reference(env, ctor, 1, &Null::constructor));
 
       Null& singleton = get_singleton();
@@ -55,12 +55,13 @@ namespace SassTypes
   }
 
   napi_value Null::New(napi_env env, napi_callback_info info) {
-    bool r;
-    CHECK_NAPI_RESULT(napi_is_construct_call(env, info, &r));
+    napi_value t;
+    CHECK_NAPI_RESULT(napi_get_new_target(env, info, &t));
+    bool r = (t != nullptr);
 
     if (r) {
       if (constructor_locked) {
-        CHECK_NAPI_RESULT(napi_throw_type_error(env, "Cannot instantiate SassNull"));
+        CHECK_NAPI_RESULT(napi_throw_type_error(env, nullptr, "Cannot instantiate SassNull"));
       }
     }
     else {

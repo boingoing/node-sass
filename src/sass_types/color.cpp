@@ -73,7 +73,7 @@ namespace SassTypes
       { "setA", nullptr, SetA },
     };
 
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 8, descriptors, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), NAPI_AUTO_LENGTH, cb, nullptr, 8, descriptors, &ctor));
     return ctor;
   }
 

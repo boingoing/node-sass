@@ -31,7 +31,7 @@ namespace SassTypes
       { "setValue", nullptr, SetValue },
     };
 
-    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), cb, nullptr, 5, descriptors, &ctor));
+    CHECK_NAPI_RESULT(napi_define_class(env, get_constructor_name(), NAPI_AUTO_LENGTH, cb, nullptr, 5, descriptors, &ctor));
     return ctor;
   }
 
@@ -57,7 +57,7 @@ namespace SassTypes
 
     size_t s = sass_map_get_length(unwrap(env, _this)->value);
     napi_value ret;
-    CHECK_NAPI_RESULT(napi_create_number(env, (double)s, &ret));
+    CHECK_NAPI_RESULT(napi_create_double(env, (double)s, &ret));
     return ret;
   }
 }
